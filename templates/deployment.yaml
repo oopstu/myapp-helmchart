@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "decisions-dev.fullname" . }}
+  labels:
+    {{- include "decisions-dev.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "decisions-dev.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "decisions-dev.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "decisions-dev.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: postgresql
+          image: postgres:15.2
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          env:
+            - name: POSTGRES_USER
+              value: pgtesting
+            - name: POSTGRES_PASSWORD
+              value: pgtesting123
+          volumeMounts:
+            - name: postgresql-pvc
+              mountPath: /var/lib/postgresql/data
+        - name: decisions-automation-server
+          image: dockerrepo.decisions.com/decisions
+          ports:
+            - containerPort: 8080
+              name: decisions
+          env:
+            - name: decisions_DATABASECONNECTSTRING
+              value: Host=localhost;Database=dectainerbitch;Port=5432;Username=pgtesting;Password=pgtesting123; 
+            - name: decisions_DATABASETYPE
+              value: POSTGRES
+            - name: decisions_FILESTORAGELOCATION
+              value: /var/decisions-filestorage
+            - name: decisions_PORTALBASEURL
+              value: http://localhost:80
+          volumeMounts:
+            - name: dec-file-store
+              mountPath: /var/decisions-filestorage
+      volumes:
+        - name: postgresql-pvc
+          hostPath:
+            path: "/opt/pgsqldata"
+          #persistentVolumeClaim:
+            # specify PVC name you defined
+            # claimName: pg-pvc
+        - name: dec-file-store
+          hostPath:
+            path: "/opt/decstore"
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
