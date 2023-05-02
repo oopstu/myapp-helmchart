@@ -44,16 +44,16 @@ spec:
         - name: decisions-automation-server
           image: dockerrepo.decisions.com/decisions
           ports:
-            - containerPort: 8080
+            - containerPort: 80
               name: decisions
           env:
-            - name: decisions_DATABASECONNECTSTRING
+            - name: DECISIONS_DATABASECONNECTSTRING
               value: Host=localhost;Database=dectainerbitch;Port=5432;Username=pgtesting;Password=pgtesting123; 
-            - name: decisions_DATABASETYPE
+            - name: DECISIONS_DATABASETYPE
               value: POSTGRES
-            - name: decisions_FILESTORAGELOCATION
+            - name: DECISIONS_FILESTORAGELOCATION
               value: /var/decisions-filestorage
-            - name: decisions_PORTALBASEURL
+            - name: DECISIONS_PORTALBASEURL
               value: http://localhost:80
           volumeMounts:
             - name: dec-file-store
