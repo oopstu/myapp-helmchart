@@ -42,7 +42,8 @@ spec:
             - name: postgresql-pvc
               mountPath: /var/lib/postgresql/data
         - name: decisions-automation-server
-          image: dockerrepo.decisions.com/decisions
+          # DockerHub Image available.
+          image: decisionscore/platform
           ports:
             - containerPort: 80
               name: decisions

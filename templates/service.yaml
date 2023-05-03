@@ -14,6 +14,6 @@ spec:
     - name: {{ .Values.service.portName }}
       port: {{ .Values.service.port }}
       protocol: TCP
-      targetPort: 8123
+      targetPort: 80
   selector:
     {{- include "decisions-dev.selectorLabels" . | nindent 4 }}
