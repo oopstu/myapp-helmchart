@@ -13,6 +13,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: dectest-decisions-dev
+            name: {{ include "decisions-dev.fullname" . }}
             port:
               number: 80
